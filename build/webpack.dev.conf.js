@@ -10,8 +10,34 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 
+// const express = require('express')
+const axios = require('axios')
+
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
+
+// const app = express()
+// let apiRoutes = express.Router()
+// apiRoutes.get('/api/getDiscList', (req, res) => {
+//   const url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
+//   axios.get(url, {
+//     headers: {
+//       referer: 'https://c.y.qq.com',
+//       host: 'c.y.qq.com'
+//     },
+//     params: req.query
+//   }).then(response => {
+//     console.log('>>data: ', response.data)
+//     res.json(response.data)
+//   }).catch(err => {
+//     console.log('>>>err: ', err)
+//   })
+// })
+
+// app.use('/api', apiRoutes)
+
+// const server = app.listen(PORT)
+// console.log('>>>server: ', server)
 
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -42,6 +68,24 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
       poll: config.dev.poll,
+    },
+    before(app) {
+      app.get('/api/getDiscList', (req, res) => {
+        const url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
+        axios.get(url, {
+          headers: {
+            referer: 'https://c.y.qq.com',
+            host: 'c.y.qq.com'
+          },
+          params: req.query
+        }).then(response => {
+          let {data} = response
+          // MusicJsonCallback({"code":0,"subcode":0,"message":"","default":0,"data":{"uin":0,"categoryId":10000000,"sortId":5,"sum":6852,"sin":0,"ein":0,"list":[{"dissid":"4271369646","createtime":"2018-08-17","commit_time":"2018-08-17","dissname":"Sweet Night：想赖在你身边","imgurl":"http://p.qpic.cn/music_cover/Biax4WTSMic4N0bgPWDwUCs73Gz1esvYHLXkoZBZ3SD0oErdbUF8mz8Q/600?n=1","introduction":"","listennum":461046,"score":0.0,"version":0,"creator":{"type":2,"qq":1245280330,"encrypt_uin":"oK-P7K-Foeoion**","name":"花痞","isVip":2,"avatarUrl":"","followflag":0}}]}})
+          // data = data.replace(/(MusicJsonCallback\(|\)$)/g, '')
+          // data = JSON.parse(data)
+          res.json(data)
+        })
+      })
     }
   },
   plugins: [
